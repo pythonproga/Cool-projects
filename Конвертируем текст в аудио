@@ -1,0 +1,4 @@
+from gtts import gTTS
+
+tts = gTTS("Тут пишем текст, который нужно озвучить", lang="ru")
+tts.save('audio.mp3')
