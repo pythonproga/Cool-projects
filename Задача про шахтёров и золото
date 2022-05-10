@@ -41,3 +41,4 @@ while mine>0:
 with open("log.txt", "a") as f:
     f.write(f"Программа завершила своё выполнение. Золота в шахте: {mine}. Количество workerow: {chisl}")
 # print(f"Программа завершила своё выполнение. Золота в шахте: {mine}. Количество workerow: {chisl}")
+
