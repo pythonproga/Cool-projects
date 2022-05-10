@@ -1,0 +1,238 @@
+import telebot
+from telebot import types
+import os
+
+client = telebot.TeleBot(ТОКЕН)
+
+@client.message_handler(commands=["info"])
+def info(message):
+    client.send_message(message.chat.id, message)
+
+
+@client.message_handler(commands=["start"])
+def menu(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    money = types.KeyboardButton("Спонсировать")
+    video = types.KeyboardButton("Мои проекты на Python")
+    talk = types.KeyboardButton("Отправить что-то автору")
+    library = types.KeyboardButton("Книги по IT")
+    markup.add(video, talk, money, library)
+    client.send_message(message.chat.id, "Нажми на одну из кнопок", reply_markup=markup)
+
+
+@client.message_handler(content_types=["text"])
+def get_text(message):
+    # def money(message):
+    if message.text == "Спонсировать":
+        client.send_message(message.chat.id, "Вот моя карта: 5536917727656578. Если, что - это Тинькофф")
+
+    # def message_talk(message):
+    if message.text == "Отправить что-то автору":
+        send_message = client.send_message(message.chat.id,
+                                           "Следующее сообщение увидет автор. Также можно отправлять фото, документ и видео размером до 20 мегабайт.")
+        client.register_next_step_handler(send_message, talk_with1)
+
+    #def library_one(message):
+    markup_library = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    library = types.KeyboardButton("Список книг")
+    say_library = types.KeyboardButton("Предложить книгу")
+    follower = types.KeyboardButton("Книги, которые предложили подписчики")
+    home0 = types.KeyboardButton("Назад")
+    markup_library.add(library, follower, say_library, home0)
+    if message.text == "Книги по IT":
+        client.send_message(message.chat.id, "Что хотите найти?", reply_markup=markup_library)
+
+    #def library_two(message):
+    markup_library_new = types.InlineKeyboardMarkup(row_width=1)
+    book_new1 = types.InlineKeyboardButton("Hello World. Занимательное программирование", url="https://telegra.ph/Hello-World-Zanimatelnoe-programmirovanie--Sehnd-Karter-Sehnd-Uorren-04-03")
+    book_new2 = types.InlineKeyboardButton("Изучаем Python", url="https://telegra.ph/Izuchaem-Python--Mark-Lutc-04-03")
+    book_new3 = types.InlineKeyboardButton("Python Programming: A Step By Guide For Begenners", url="https://telegra.ph/Python-Python-programmingA-Step-by-Step-Guide-For-Absolute-Beginners--Brajan-Dzhenkis-04-03")
+    markup_library_new.add(book_new1, book_new2, book_new3)
+
+    markup_library_another = types.InlineKeyboardMarkup(row_width=1)
+    book1 = types.InlineKeyboardButton("Програмирование на Python", url="https://telegra.ph/Programmirovanie-na-Python--Lutc-Mark-04-03")
+    book2 = types.InlineKeyboardButton("Программист-прагматик. Путь от подмастерья к мастеру ", url="https://telegra.ph/Programmist-pragmatik-Put-ot-podmasterya-k-masteru--Dejv-Tomas-EHndi-Hant-04-03")
+    book3 = types.InlineKeyboardButton("Python - к вершинам мастерства", url="https://telegra.ph/Python-K-vershinam-masterstva--Luchano-Ramalo-04-04")
+    book4 = types.InlineKeyboardButton("Чистый код. Создание, анализ и рефакторинг", url="https://telegra.ph/CHistyj-kod-Sozdanie-analiz-i-refaktoring--Robert-Martin-04-04")
+    book5 = types.InlineKeyboardButton("Python Programming: A Step By Step Guide For Begginers", url="https://telegra.ph/Python-Programming-The-Basic-Blackhat-Intermediary-and-Advanced-Guide-to-Python-Programming--Richard-Ozer-04-04")
+    book6 = types.InlineKeyboardButton("Совершенный код. Мастер-класс", url="https://telegra.ph/Sovershennyj-kod-Master-klass--Stiv-Makkonnell-04-04")
+    markup_library_another.add(book1, book2, book3, book4, book5, book6)
+
+    #def library_three(message):
+    markup_library_follower = types.InlineKeyboardMarkup(row_width=1)
+    book_follower1 = types.InlineKeyboardButton("Привет, Pуthоn! Моя первая книга по программированию", url="https://telegra.ph/Privet-Puthon-Moya-pervaya-kniga-po-programmirovaniyu--Petr-Tomashevskij-04-10")
+    book_follower2 = types.InlineKeyboardButton("Укус Питона", url="https://telegra.ph/Ukus-Pitona--Swaroop-Chitlur-04-10")
+    book_follower3 = types.InlineKeyboardButton("#Сам себе программист", url="https://telegra.ph/Sam-sebe-programmist--Kori-Althoff-04-16")
+    markup_library_follower.add(book_follower1, book_follower2, book_follower3)
+
+    if message.text == "Список книг":
+        client.send_message(message.chat.id, "Книги для абсолютных новичков по Python:", reply_markup=markup_library_new)
+        client.send_message(message.chat.id, "Остальные книги, и не только про Python:", reply_markup=markup_library_another)
+    elif message.text == "Книги, которые предложили подписчики":
+        client.send_message(message.chat.id, "Книги, которые предложили подписчики", reply_markup=markup_library_follower)
+    elif message.text == "Предложить книгу":
+        send_book = client.send_message(message.chat.id, "Отправьте название книги")
+        client.register_next_step_handler(send_book, send_book_txt)
+
+    #def python_project_one(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    game = types.KeyboardButton("Игры, рисунки и tkinter")
+    project = types.KeyboardButton("Крутые проекты")
+    module = types.KeyboardButton("Обзор модулей")
+    home = types.KeyboardButton("Назад")
+    markup.add(game, project, module, home)
+    if message.text == "Мои проекты на Python":
+        client.send_message(message.chat.id, "Что хотите найти?", reply_markup=markup)
+
+    # def python_project_two(message):
+    markup_game = types.InlineKeyboardMarkup(row_width=1)
+    snake = types.InlineKeyboardButton("Игра змейка", url="https://t.me/pythonproga/29")
+    love = types.InlineKeyboardButton("Рисунок сердечко", url="https://t.me/pythonproga/49")
+    flower = types.InlineKeyboardButton("Рисунок цветочек", url="https://t.me/pythonproga/53")
+    art = types.InlineKeyboardButton("Просто красивый рисунок", url="https://t.me/pythonproga/68")
+    golden = types.InlineKeyboardButton("Золотое недосечение", url="https://t.me/pythonproga/80")
+    figlet = types.InlineKeyboardButton("Программа, которая пишет текст красивыми шрифтами", url="https://t.me/pythonproga/82")
+    recursive = types.InlineKeyboardButton("Квадрат с помошью рекурсивной функции", url="https://t.me/pythonproga/101")
+    table = types.InlineKeyboardButton("Таблица умножения", url="https://t.me/pythonproga/113")
+    calcul = types.InlineKeyboardButton("Калькултор на tkinter", url="https://t.me/pythonproga/139")
+    markup_game.add(snake, love, flower, art, golden, figlet, recursive, table, calcul)
+
+    markup_project = types.InlineKeyboardMarkup(row_width=1)
+    camera = types.InlineKeyboardButton("Как вызвать камеру", url="https://t.me/pythonproga/31")
+    goul = types.InlineKeyboardButton("Я гуль", url="https://t.me/pythonproga/26")
+    text = types.InlineKeyboardButton("Делаем из текста аудио", url="https://t.me/pythonproga/34")
+    info_ip = types.InlineKeyboardButton("Пробиваем по IP", url="https://t.me/pythonproga/36")
+    bot = types.InlineKeyboardButton("Исходный код этого бота", url="https://t.me/pythonproga/48")
+    translate = types.InlineKeyboardButton("Переводчик", url="https://t.me/pythonproga/52")
+    dowland_file = types.InlineKeyboardButton("Скачиваем файл", url="https://t.me/pythonproga/65")
+    keylogger = types.InlineKeyboardButton("Кейлоггер", url="https://t.me/pythonproga/95")
+    sort = types.InlineKeyboardButton("Сортировка списка", url="https://t.me/pythonproga/111")
+    brutfors = types.InlineKeyboardButton("Брутфорс", url="https://t.me/pythonproga/112")
+    js_on = types.InlineKeyboardButton("Очистка json файлов", url="https://t.me/pythonproga/117")
+    block = types.InlineKeyboardButton("Как заблокировать сайт", url="https://t.me/pythonproga/118")
+    markup_project.add(goul, camera, text, info_ip, bot, translate, dowland_file, keylogger, sort, brutfors, js_on, block)
+
+    markup_module = types.InlineKeyboardMarkup(row_width=1)
+    this = types.InlineKeyboardButton("Исходный код модуля this", url="https://t.me/pythonproga/43")
+    socket = types.InlineKeyboardButton("Модуль socket", url="https://t.me/pythonproga/62")
+    requets = types.InlineKeyboardButton("Модуль requests", url="https://t.me/pythonproga/73")
+    markup_module.add(this, socket, requets)
+
+    if message.text == "Игры, рисунки и tkinter":
+        client.send_message(message.chat.id, "Игры, рисунки и tkinter", reply_markup=markup_game)
+    elif message.text == "Крутые проекты":
+        client.send_message(message.chat.id, "Крутые проекты", reply_markup=markup_project)
+    elif message.text == "Обзор модулей":
+        client.send_message(message.chat.id, "Обзор модулей", reply_markup=markup_module)
+    elif message.text == "Назад":
+        menu(message)
+
+
+def send_book_txt(message):
+    try:
+        if message.content_type == "text":
+            print("Предложенные книги; ", message.chat.username, " / ", message.chat.first_name, " ",
+                  message.chat.last_name, " / название книги: ", message.text,
+                  sep="", end=" /\\ ")
+            if message.chat.last_name == None:
+                message.chat.last_name = "0"
+
+            with open('book.txt', 'a', encoding="utf-8") as f:
+                s = ''.join(("Предложенные книги; ", message.chat.username, " / ", message.chat.first_name,
+                             message.chat.last_name, " / название книги", ":", " ",
+                             message.text, " /\\ "))
+                f.write(s)
+            send_book = client.send_message(message.chat.id, "Теперь введите автора книги:")
+            client.register_next_step_handler(send_book, send_autor_txt)
+        else:
+            send_message = client.send_message(message.chat.id, "ОТПРАВЬТЕ ТЕКСТ!")
+            client.register_next_step_handler(send_message, send_book_txt)
+    except:
+        print("ERROR2")
+        with open("error.txt", "a", encoding="utf-8") as f:
+            f.write("ERROR2\n")
+        client.send_message(message.chat.id, "ОШИБКА, ПОПРОБУЙТЕ ЗАНОВО!")
+
+
+def send_autor_txt(message):
+    try:
+        print("Предложенные книги; ", message.chat.username, " / ", message.chat.first_name, " ", message.chat.last_name,
+              " / автор книги: ", message.text,
+              sep="")
+        if message.chat.last_name == None:
+            message.chat.last_name = "0"
+
+        with open('book.txt', 'a', encoding="utf-8") as f:
+            s = ''.join(("Предложенные книги; ", message.chat.username, " / ", message.chat.first_name,
+                         message.chat.last_name, " / автор книги", ":", " ",
+                         message.text, "\n"))
+            f.write(s)
+        client.send_message(message.chat.id, "Ваш запрос принят")
+    except:
+        print("ERROR3")
+        with open("error.txt", "a", encoding="utf-8") as f:
+            f.write("ERROR3\n")
+        client.send_message(message.chat.id, "ОШИБКА, ПОПРОБУЙТЕ ЗАНОВО!")
+
+def dowland_file_bot(message, c, img, send):
+    file_photo = client.get_file(c)
+
+    filename, file_extension = os.path.splitext(file_photo.file_path)
+
+    img = img
+    chisl = 1
+
+    b=img+str(chisl)+file_extension
+
+    while os.path.exists(b)!=False:
+        b = img+str(chisl)+file_extension
+        chisl+=1
+
+    save_photo = client.download_file(file_photo.file_path)
+    with open(b, 'wb') as new_file:
+        new_file.write(save_photo)
+
+    if message.chat.last_name == None:
+        message.chat.last_name = "0"
+    print(message.chat.username, " / ", message.chat.first_name, " ", message.chat.last_name, ":", " ", message.text,
+          " !!! ", b, sep="", end=" /// ")
+    with open('talk_with_autor.txt', 'a', encoding="utf-8") as f:
+        s = ''.join((message.chat.username, " / ", message.chat.first_name, " ", message.chat.last_name, ":", " ", "0",
+                     " !!! ", b, " /// "))
+        f.write(s)
+
+    send_message = client.send_message(message.chat.id,
+                                       f"Автор увидит это {send}. Теперь отправьте ещё одно или напишите что-то!")
+    client.register_next_step_handler(send_message, talk_with1)
+
+def talk_with1(message):
+    try:
+        if message.content_type == "photo":
+            dowland_file_bot(message, message.photo[-1].file_id, "photo", "фото")
+        elif message.content_type == "video":
+            dowland_file_bot(message, message.video.file_id, "video", "видео")
+        elif message.content_type == "text":
+            talk_with2(message)
+        elif message.content_type == "document":
+            dowland_file_bot(message, message.document.file_id, "document", "файл")
+        else:
+            send_message = client.send_message(message.chat.id, "Отправьте либо текст, либо фото, либо видео, либо документ!")
+            client.register_next_step_handler(send_message, talk_with1)
+    except:
+        print("ERROR1")
+        with open("error.txt", "a", encoding="utf-8") as f:
+            f.write("ERROR1\n")
+        client.send_message(message.chat.id, "ОШИБКА, ПОПРОБУЙТЕ ЗАНОВО!")
+
+
+def talk_with2(message):
+    print(message.chat.username, " / ", message.chat.first_name, " ", message.chat.last_name, ":", " ", message.text, sep="")
+    if message.chat.last_name == None:
+        message.chat.last_name = "0"
+
+    with open('talk_with_autor.txt', 'a', encoding="utf-8") as f:
+        s = ''.join((message.chat.username, " / ", message.chat.first_name, " ", message.chat.last_name, ":", " ", message.text, "\n",))
+        f.write(s)
+    client.send_message(message.chat.id, "Автор увидит это сообщение, но вы уже вышли из режима общения с автором")
+
+client.polling(none_stop=True, interval=0, timeout=0)
