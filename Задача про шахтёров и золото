@@ -1,0 +1,43 @@
+import time
+from threading import Thread
+
+#создаём переменную с шахтой
+mine=1000
+
+#создаём функцию, которая создаёт нового workera
+def worker(name):
+    global mine
+    #в переменной mani хранится количество золота, которое добыл worker
+    mani=0
+
+    #пока в шахте есть золото worker работает
+    while mine>0:
+        mine-=3
+        mani+=3
+        with open("log.txt", "a") as f:
+            f.write(f"{name}: {mani}"+"\n")
+        # print(f"{name}: {mani}")
+        time.sleep(1)
+
+#создаём первых трёх workerow
+t1=Thread(target=worker, args=("Worker#1",))
+t1.start()
+t1=Thread(target=worker, args=("Worker#2",))
+t1.start()
+t1 = Thread(target=worker, args=("Worker#4",))
+t1.start()
+
+#перменная, которая будет обозначать номер workera
+chisl=3
+
+#пока в шахте больше 0 золота, каждые десять секунд создаём workera
+while mine>0:
+    chisl += 1
+    t1=Thread(target=worker, args=("Worker#"+str(chisl),))
+    t1.start()
+
+    time.sleep(10)
+
+with open("log.txt", "a") as f:
+    f.write(f"Программа завершила своё выполнение. Золота в шахте: {mine}. Количество workerow: {chisl}")
+# print(f"Программа завершила своё выполнение. Золота в шахте: {mine}. Количество workerow: {chisl}")
