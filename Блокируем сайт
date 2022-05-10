@@ -1,0 +1,37 @@
+# -*- coding: utf8 -*-
+a=input()
+
+def address(): #добавляем ещё одно название сайта с приставкой www.
+    site_address = input("Адрес сайта: ")
+    if site_address[:4] == "www.":
+        global message_site
+        message_site = [site_address, site_address[4:]]
+    elif site_address[:4] != "www.":
+        message_site = [site_address, "www." + site_address]
+
+if a == "заблокировать":
+    hosts = r'C:\Windows\System32\drivers\etc\hosts'
+    redicter_url = "127.0.0.1"
+    address()
+    with open(hosts, "r+") as f:
+        src = f.read()
+        n = "\n"
+        for site in message_site:
+            if site in src:
+                print(f"Этот сайт уже заблокирован:{n}{site}")
+            else:
+                f.write(f"{redicter_url} {site}\n")
+                print(f"Сайт добавлен в раздел заблокированных:{n}{site}")
+elif a == "разблокировать":
+    hosts = r'C:\Windows\System32\drivers\etc\hosts'
+    address()
+
+    with open(hosts, 'r+') as file:
+        src = file.readlines()
+        file.seek(0)
+
+        for line in src:
+            if not any(site in line for site in message_site):
+                file.write(line)
+        file.truncate()
+    print("Сайты разблокированы")
