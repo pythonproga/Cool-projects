@@ -1,0 +1,10 @@
+# -*- coding: utf8 -*-
+from string import printable
+
+password = "1234"
+
+for i1 in printable:
+    for i2 in printable:
+        for i3 in printable:
+            for i4 in printable:
+                print(i1+i2+i3+i4)
