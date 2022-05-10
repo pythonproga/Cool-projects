@@ -1,0 +1,9 @@
+import requests
+import os
+
+url = "Тут пишем ссылку на файл"
+filename, file_extension = os.path.splitext(url) #узнаём расширение файла
+r = requests.get(url)
+
+with open('Тут пишем место, где будет храниться файл и само название файла без расширения'+file_extension, 'wb') as f:
+    f.write(r.content) #тут мы сохраняем файл
