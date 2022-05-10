@@ -1,0 +1,8 @@
+import time
+
+i = 1007
+while i>0:
+    i = i - 7
+    time.sleep(0.04)
+    print(i)
+print("Я гуль")
