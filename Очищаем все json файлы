@@ -1,0 +1,12 @@
+import os
+import json
+
+data = json.loads("{}")
+
+files = os.listdir(os.getcwd())
+
+for i in files:
+    name, extension = os.path.splitext(i)
+    if extension == ".json":
+        with open(i, "w") as f:
+            json.dump(data, f)
