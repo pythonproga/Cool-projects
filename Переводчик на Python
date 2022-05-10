@@ -1,0 +1,6 @@
+import translate
+
+translator = translate.Translator(from_lang="en", to_lang="ru")
+text = input("Введите текст: ")
+
+print("Вот перевод: ", translator.translate(text))
