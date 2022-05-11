@@ -1,0 +1,15 @@
+import os
+from os.path import join
+
+file=input("Введите название файла: ")
+disk = input(r"Введите нужный диск. Пример: D:\\ ")
+
+for root, dirs, files in os.walk(disk):
+    if file in files:
+        file_abth = join(root, files[files.index(file)])
+        print("Полный путь к файлу: "+file_abth)
+        break
+else:
+    print("Файл не найден")
+
+os.startfile(file_abth)
