@@ -1,0 +1,246 @@
+#-*- coding: utf8 -*-
+import keyboard
+from pynput import keyboard
+import os
+from fuzzywuzzy import fuzz
+from os.path import join
+import pyttsx3
+from datetime import datetime
+import webbrowser
+import random
+import json
+import pyaudio
+from vosk import Model, KaldiRecognizer
+
+path = "Скачиваем модель русского языка вот с этого сайта: https://alphacephei.com/vosk/models. Дальше вам нужно распаковать папку из архива, а в это переменной указать полный путь к ПАПКЕ!"
+
+model = Model(path)
+rec = KaldiRecognizer(model, 16000)
+p = pyaudio.PyAudio()
+stream = p.open(format=pyaudio.paInt16, channels=1, rate=16000,input=True, frames_per_buffer=8000)
+stream.start_stream()
+
+speak_engine = pyttsx3.init()
+
+commands_dict = {
+    #для того, чтобы ассистент активировался, нужно сказать одно из слов в этом списке
+    "alias": ('джарвис', 'жарвис', 'джарис', 'джарвиз', 'жарвиз', 'джавиз',
+              'джавис', 'джариз', 'ассистент', "жаришь", "чарльз", "жанр", "жар лесу", "жар", "жаль нет", "жаль без", "джанис"),
+    "tbr": ('скажи', 'расскажи', 'покажи', 'сколько', 'произнеси'),
+    'commands': {
+        #в качестве ключа у нас имя функции, а в списке команды, которые нужно назвать, чтобы вызвать эту функцию вызвать эту функцию
+        'hello': ['привет', 'приветствую', 'здравствуй', 'здорова', 'здорово', 'здравствуйте', "в привет", "с привет", "ты привет", "премьер"],
+        'create_task': ['добавить задачу', 'создать задачу', 'заметка', "добавь заметку", "добавь задачу", "добавь ещё одну задачу", "добавить ещё одну задачу", "заметка", "задача", "попасть заметку"],
+        'play_music': ['включить музыку', 'дискотека', 'включить песню', "учить песню", "с включи песню"],
+        'time': ["время", "времени", "который час", "время", "сейчас времени", "час", "время", "какой сейчас час", "по который час"],
+        'date': ["какой сегодня день", 'какая сегодня дата', 'дату', 'день', "день недели", "какой сегодня день недели", "date", "какая сегодня-завтра", "какой сейчас год", "какой сейчас день", "в  в какой сегодня день"],
+        "browser": ["открой браузер", "включи браузер", "браузер", "chrom", "хром", "открой хром", "включи хром", "такой браузер", "бронь браузере"],
+        "browser_find": ["найди в браузере", "вбей в поиске", "найди в интернете", "загугли", "найди браузере", "не браузере", "медик браузере", "медик в браузере", "реки в браузере"],
+        "umor": ["анекдот", "шутка", "юмор", "рас анекдот", "рас шутка", "рас эмор", "ещё один анекдот", "ещё раз анекдот", "рас ещё один анекдот", "рас ещё раз анекдот", "рас ещё одну шутку", "ещё одну шутку", "рас ещё раз шутку", "ещё раз шутку"],
+        "ex": ["выключись", "выйди", "отключись", 'заткнись', "остановись"],
+        "youtube": ["открой ютуб", "найди видео", "включи видео", "найди в ютубе", "ключи ютубу", "открой"]
+    }
+}
+
+#эта функция слушает, что говорит пользователь и возвращает название команды
+def listen_command():
+    while True:
+        data = stream.read(4000, exception_on_overflow=False)
+        if (rec.AcceptWaveform(data)) and (len(data)>0):
+            answer = json.loads(rec.Result())
+            if answer["text"]:
+                query = answer["text"].lower()
+                break
+
+    for i in commands_dict["alias"]:
+        if i in query:
+            cmd = query
+            for x in commands_dict['alias']:
+                cmd = cmd.replace(x, "").strip()
+            for x in commands_dict['tbr']:
+                cmd = cmd.replace(x, "").strip()
+            print(f"Распознано: {cmd}")
+            cmd = recognize_cmd(cmd)
+            return cmd
+    return None
+
+#функция помогает найти команду, даже если её сказали невнятно
+def recognize_cmd(cmd):
+    for c, v in commands_dict['commands'].items():
+        for x in v:
+            vrt = fuzz.ratio(cmd, x)
+            if vrt > 90:
+                return c
+    return "Команда не найдена!"
+
+#эта функция говорит и печатает какой-то текст
+def say(text):
+    print(text)
+    speak_engine.say(text)
+    speak_engine.runAndWait()
+    speak_engine.stop()
+
+#эта функция слушает, что говорит пользователь, и возвращает то, что он сказал
+def listen():
+    while True:
+        data = stream.read(4000, exception_on_overflow=False)
+        if (rec.AcceptWaveform(data)) and (len(data) > 0):
+            answer = json.loads(rec.Result())
+            if answer["text"]:
+                query = answer['text'].lower()
+                break
+    cmd = query
+    for x in commands_dict['alias']:
+        cmd = cmd.replace(x, "").strip()
+    for x in commands_dict['tbr']:
+        cmd = cmd.replace(x, "").strip()
+    print(f"Распознано: {cmd}")
+    return cmd
+
+#функция, которая приветсвует пользователя
+def hello():
+    text = [
+        'Здравствуй',
+        'Привет',
+        'Здорова'
+    ]
+
+    say(random.choice(text))
+
+#функция, которая что-то добавляет в заметки
+def create_task():
+    say("Что добавим в список дел?")
+
+    query = listen()
+
+    if query!="Голос не распознан!":
+        with open('todo-list.txt', 'a') as file:
+            file.write(f'Задача: {query}\n')
+
+        say(f'Задача "{query}" добавлена в заметки')
+    else:
+        say(query)
+
+#функция, которая включает музыку
+def play_music():
+    say("Скажите песню")
+
+    query=listen()
+    query = query.replace('эмпат три', "").replace(" ","").strip()
+
+    query+=".mp3"
+
+    #если песня есть в папке с кодом, то просто запускаем песню
+    if os.path.exists(query):
+        say(f'Танцуем под {query}')
+        os.system(f"start {query}")
+    #а иначе ищем песню по всему компьютеру
+    else:
+        run = True
+
+        def on_release(key):
+            if key == keyboard.Key.esc:
+                nonlocal run
+                run=False
+                return False
+
+        listener = keyboard.Listener(on_release=on_release)
+        listener.start()
+
+        say(f"Осуществляем поиск песни: {query}. Нажмите ecs, чтобы прекратить.")
+
+        for root, dirs, files in os.walk('D:\\'):
+            if run==False:
+                say("Поиск песни прекращён!")
+                break
+            if query in files:
+                sound = join(root, files[files.index(query)])
+                say(f'Танцуем под {query}')
+                os.system(f"start {sound}")
+                break
+        else:
+            say("Песня не найдена!")
+
+#функция сообщает сколько сейчас времени
+def time():
+    say(f"{datetime.now().time():Сейчас %H часов, %M минут!}")
+
+#функция сообщает какой сегодня день
+def date():
+    mes = {
+        "January" :'января',
+        "February" : 'февраля',
+        "March" : 'марта',
+        "April" : 'апреля',
+        "May" : 'мая',
+        "June" : 'июня',
+        "July" : 'июля',
+        "August" : 'августа',
+        "September" : 'сентября',
+        "October" : 'октября',
+        "November" : 'ноября',
+        "December" : 'декабря'
+    }
+    now = f"{datetime.now():Сегодня %d %B %y года}"
+    #меняем английское название месяца на русское
+    for k, v in mes.items():
+        if k in now:
+            now = now.replace(k, v)
+    say(now)
+
+#функция просто запускает браузер
+def browser():
+    say("Хорошо")
+    chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
+    webbrowser.get(chrome_path).open("https://github.com/pythonproga")
+    webbrowser.get(chrome_path).open("https://www.google.ru/")
+
+#функция ищет запрос в браузере
+def browser_find():
+    say("Скажите запрос")
+
+    query = listen()
+
+    chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
+    webbrowser.get(chrome_path).open(f"https://www.google.ru/search?q={query}")
+
+#функция ищет видео в ютуб
+def youtube():
+    say("Скажите запрос")
+
+    query = listen()
+
+    chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
+    webbrowser.get(chrome_path).open(f"https://www.youtube.com/results?search_query={query}")
+
+# функция рассказывает рандомную шутку из шуток ниже
+def umor():
+    jokes = [
+        "В поезде едут 3 юзера и 3 программиста. У юзеров 3 билета, у программистов 1. Заходит контроллер. Юзеры показывают билеты, программисты прячутся в туалет. Контроллер стучится в туалет, оттуда высовывается рука с билетом. Программисты едут дальше. На обратном пути. У юзеров 1 билет, у программистов ни одного. Заходит контроллер. Юзеры прячутся в туалет. Один из программистов стучит, из туалета высовывается рука с билетом. Программисты забирают билет и прячутся в соседний туалет. Юзеров ссаживают с поезда. Вывод — не всякий алгоритм, доступный программисту, доступен юзеру."
+        "Жена посылает мужа-программиста в магазин: - Купи батон колбасы. Да, и спроси, есть ли яйца. Если есть - возьми десяток. Программист приходит в магазин: - Батон колбасы, пожалуйста. Ага, спасибо. А яйца у вас в продаже есть? - Есть. - Тогда, пожалуйста, ещё девять батонов колбасы.",
+        "Если бы программисты были врачами, им бы говорили «У меня болит нога», а они отвечали «Ну не знаю, у меня такая же нога, а ничего не болит».",
+        "- По радио сообщили о переходе на зимнее время, сказав, что «этой ночью, ровно в 03:00 нужно перевести стрелку часов на один час назад, на 02:00» - У всех программистов эта ночь зависла в бесконечном цикле.",
+        "Приходит программист к другу-пианисту – посмотреть на новый рояль. Долго ходит вокруг, хмыкает, потом заявляет: - Клава неудобная – всего 84 клавиши, половина функциональных, ни одна не подписана; хотя... шифт нажимать ногой – оригинально..."
+    ]
+
+    say(random.choice(jokes))
+
+# эта функция выходит из программы
+def ex():
+    say("Так точно!")
+    exit()
+
+#функция, которая всё время слушает команды и их запускает
+def main():
+    while True:
+        quer = listen_command()
+
+        if quer=="Команда не найдена!":
+            say(quer)
+        elif quer!=None:
+            for k, v in commands_dict['commands'].items():
+                if k==quer:
+                    globals()[k]()
+
+if __name__ == '__main__':
+    main()
