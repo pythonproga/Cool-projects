@@ -1,0 +1,28 @@
+# -*- coding: utf8 -*-
+import sys
+import time
+from pynput.keyboard import Key, Listener
+import keyboard
+
+run=True
+def on_press(key):
+    if key == Key.esc:
+        global run
+        run=False
+
+listener = Listener(on_press=on_press)
+listener.start()
+
+printable=r"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!'#$%&'()*+,-./:;<=>?@[\]^_`{|}~"+r'"'
+
+keyboard.wait("Enter")
+for i1 in printable:
+    for i2 in printable:
+        for i3 in printable:
+            for i4 in printable:
+                if run:
+                    keyboard.write(i1 + i2 + i3 + i4)
+                    keyboard.press("Enter")
+                    time.sleep(0.01)
+                else:
+                    sys.exit()
